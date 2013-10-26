@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+      body {
+        font-family: Monospace;
+        background-color: #f0f0f0;
+        margin: 0px;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="container"></div>
+
+     <script src="lib/three.js"></script>
+     <script src="lib/OrbitAndPanControls.js"></script>
+     <script src="lib/Coordinates.js"></script>
+     <script src="lib/dat.gui.min.js"></script>
+
+    <script>
+    var camera, scene, renderer;
+    var cameraControls, effectController;
+    var clock = new THREE.Clock();
+    var gridX = false;
+    var gridY = false;
+    var gridZ = false;
+    var axes = false;
+    var ground = true;
+
+    function init() {
+      var canvasWidth = 846;
+      var canvasHeight = 494;
+      var canvasRatio = canvasWidth / canvasHeight;
+
+      // RENDERER
+      renderer = new THREE.WebGLRenderer( { antialias: true } );
+      renderer.gammaInput = true;
+      renderer.gammaOutput = true;
+      renderer.setSize(canvasWidth, canvasHeight);
+      renderer.setClearColorHex( 0xAAAAAA, 1.0 );
+
+      // CAMERA
+      camera = new THREE.PerspectiveCamera( 45, canvasRatio, 1, 40000 );
+      // CONTROLS
+      cameraControls = new THREE.OrbitAndPanControls(camera, renderer.domElement);
+
+      camera.position.set( -480, 659, -619 );
+      cameraControls.target.set(4,301,92);
+
+      fillScene();
+    }
+
+    // Supporting frame for the bird - base + legs + feet
+    function createSupport() {
+
+      var cubeMaterial = new THREE.MeshLambertMaterial( { color: 0xF07020 } );
+      var cube;
+
+      // bird base
+      var BASE_WIDTH = 20+64+110;       // x
+      var BASE_HEIGHT = 4;              // y
+      var BASE_DEPTH = 2*77;            // z
+      var baseGeometry = new THREE.CubeGeometry( BASE_WIDTH, BASE_HEIGHT, BASE_DEPTH );
+      cube = new THREE.Mesh( baseGeometry, cubeMaterial );
+      cube.position.x = (20+32) - BASE_WIDTH/2;
+      cube.position.y = BASE_HEIGHT/2;
+      cube.position.z = 0;
+      scene.add( cube );
+      
+      // bird feet
+      var FOOT_WIDTH = 194;             // x
+      var FOOT_HEIGHT = 52;             // y
+      var FOOT_DEPTH = 6;               // z
+      var footGeometry = new THREE.CubeGeometry( FOOT_WIDTH, FOOT_HEIGHT, FOOT_DEPTH );
+      // L
+      cube = new THREE.Mesh( footGeometry, cubeMaterial );
+      cube.position.x = -45;
+      cube.position.y = FOOT_HEIGHT/2;
+      cube.position.z = (FOOT_DEPTH + BASE_DEPTH)/2;
+      scene.add( cube );
+      // R
+      cube = new THREE.Mesh( footGeometry, cubeMaterial );
+      cube.position.x = -45;
+      cube.position.y = FOOT_HEIGHT/2;
+      cube.position.z = (FOOT_DEPTH - BASE_DEPTH)/2;
+      scene.add( cube );
+
+      // bird legs
+      var LEG_WIDTH = 64;                 // x
+      var LEG_HEIGHT = 334+52;            // y
+      var LEG_DEPTH = 6;                  // z
+      var legGeometry = new THREE.CubeGeometry( LEG_WIDTH, LEG_HEIGHT, LEG_DEPTH );
+      // L
+      cube = new THREE.Mesh( legGeometry, cubeMaterial );
+      cube.position.x = 0;
+      cube.position.y = LEG_HEIGHT/2;
+      cube.position.z = (FOOT_DEPTH + BASE_DEPTH)/2;
+      scene.add( cube );
+      // R
+      cube = new THREE.Mesh( legGeometry, cubeMaterial );
+      cube.position.x = 0;
+      cube.position.y = LEG_HEIGHT/2;
+      cube.position.z = (FOOT_DEPTH - BASE_DEPTH)/2;
+      scene.add( cube );
+
+    }
+
+    // Body of the bird - body and the connector of body and head
+    function createBody() {
+       var sphereMaterial = new THREE.MeshLambertMaterial( { color: 0xA00000 } );
+       var sphereGeometry = new THREE.SphereGeometry( 116/2, 32, 32 );
+       var body = new THREE.Mesh( sphereGeometry, sphereMaterial );
+       body.position.y = 160;
+       scene.add( body );
+
+       var cylinderMaterial = new THREE.MeshLambertMaterial( { color: 0x0000D0 } );
+       var cylinderGeometry = new THREE.CylinderGeometry( 12, 12, 390 );
+       var torso = new THREE.Mesh( cylinderGeometry, cylinderMaterial );
+       torso.position.y = 334+52;
+       scene.add( torso );
+    }
+
+    // Head of the bird - head + hat
+    function createHead() {
+       var sphereMaterial = new THREE.MeshLambertMaterial( { color: 0xA00000 } );
+       var sphereGeometry = new THREE.SphereGeometry(104/2, 32, 32);
+       var head = new THREE.Mesh( sphereGeometry, sphereMaterial );
+       head.position.y = 160+390;
+       scene.add( head );
+
+       var cylinderMaterial = new THREE.MeshLambertMaterial( { color: 0x0000D0 } );
+       var cylinderGeometry = new THREE.CylinderGeometry( 142, 142, 10, 32, 32);
+       var hatBill = new THREE.Mesh( cylinderGeometry, cylinderMaterial );
+       hatBill.position.y = 597;
+       scene.add( hatBill );
+
+       cylinderGeometry = new THREE.CylinderGeometry( 80, 80, 70, 32, 32);
+       var hatBody = new THREE.Mesh( cylinderGeometry, cylinderMaterial );
+       hatBody.position.y = 637;
+       scene.add( hatBody );
+
+    }
+
+    function createDrinkingBird() {
+
+      // MODELS
+      // base + legs + feet
+      createSupport();
+      
+      // body + body/head connector
+      createBody();
+
+      // head + hat
+      createHead();
+    }
+
+    function fillScene() {
+      // SCENE
+      scene = new THREE.Scene();
+      scene.fog = new THREE.Fog( 0x808080, 3000, 6000 );
+      // LIGHTS
+      var ambientLight = new THREE.AmbientLight( 0x222222 );
+      var light = new THREE.DirectionalLight( 0xffffff, 1.0 );
+      light.position.set( 200, 400, 500 );
+      
+      var light2 = new THREE.DirectionalLight( 0xffffff, 1.0 );
+      light2.position.set( -400, 200, -300 );
+
+      scene.add(ambientLight);
+      scene.add(light);
+      scene.add(light2);
+
+      scene.add(camera);
+
+      if (ground) {
+        Coordinates.drawGround({size:1000});    
+      }
+      if (gridX) {
+        Coordinates.drawGrid({size:1000,scale:0.01});
+      }
+      if (gridY) {
+        Coordinates.drawGrid({size:1000,scale:0.01, orientation:"y"});
+      }
+      if (gridZ) {
+        Coordinates.drawGrid({size:1000,scale:0.01, orientation:"z"});  
+      }
+      if (axes) {
+        Coordinates.drawAllAxes({axisLength:300,axisRadius:2,axisTess:50});
+      }
+      createDrinkingBird();
+    }
+    //
+    function addToDOM() {
+        var container = document.getElementById('container');
+        var canvas = container.getElementsByTagName('canvas');
+        if (canvas.length>0) {
+            container.removeChild(canvas[0]);
+        }
+        container.appendChild( renderer.domElement );
+    }
+
+    function animate() {
+      window.requestAnimationFrame(animate);
+      render();
+    }
+
+    function render() {
+      var delta = clock.getDelta();
+      cameraControls.update(delta);
+      if ( effectController.newGridX !== gridX || effectController.newGridY !== gridY || effectController.newGridZ !== gridZ || effectController.newGround !== ground || effectController.newAxes !== axes)
+      {
+        gridX = effectController.newGridX;
+        gridY = effectController.newGridY;
+        gridZ = effectController.newGridZ;
+        ground = effectController.newGround;
+        axes = effectController.newAxes;
+
+        fillScene();
+      }
+      renderer.render(scene, camera);
+    }
+
+    function setupGui() {
+
+      effectController = {
+      
+        newGridX: gridX,
+        newGridY: gridY,
+        newGridZ: gridZ,
+        newGround: ground,
+        newAxes: axes,
+
+        dummy: function() {
+        }
+      };
+
+      var gui = new dat.GUI();
+      gui.add(effectController, "newGridX").name("Show XZ grid");
+      gui.add( effectController, "newGridY" ).name("Show YZ grid");
+      gui.add( effectController, "newGridZ" ).name("Show XY grid");
+      gui.add( effectController, "newGround" ).name("Show ground");
+      gui.add( effectController, "newAxes" ).name("Show axes");
+    }
+
+      init();
+      setupGui();
+      addToDOM();
+      animate();
+
+    </script>
+  </body>
+</html>
