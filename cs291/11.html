@@ -59,28 +59,19 @@
         // hat and body: 100
         // leg: 4
         // foot: 30
-        var SPECULAR_COLOR = new THREE.Color("rgb(0.5,0.5,0.5)");
-        var headMaterial = new THREE.MeshPhongMaterial( );
-        headMaterial.color.setRGB(104/255, 1/255, 5/255);
-        headMaterial.specular = SPECULAR_COLOR
+        var headMaterial = new THREE.MeshPhongMaterial( { color: 0x680105, shininess: 100 } );
+        var hatMaterial = new THREE.MeshPhongMaterial( { color: 0x18264D, shininess: 100 } );
+        var bodyMaterial = new THREE.MeshPhongMaterial( { color: 0x1F56A9, shininess: 100 } );
+        var legMaterial = new THREE.MeshPhongMaterial( { color: 0xAdA79b, shininess: 4 } );
+        var footMaterial = new THREE.MeshPhongMaterial( { color: 0x960f0b, shininess: 40 } );
 
-        var hatMaterial = new THREE.MeshPhongMaterial( );
-        hatMaterial.color.setRGB(24/255, 38/255, 77/255);
-        hatMaterial.specular = SPECULAR_COLOR;
-
-        var bodyMaterial = new THREE.MeshPhongMaterial( );
-        bodyMaterial.color.setRGB( 31/255, 86/255, 169/255 );
-        bodyMaterial.specular = SPECULAR_COLOR;
-
-        var legMaterial = new THREE.MeshPhongMaterial( );
-        legMaterial.color.setHex( 0xAdA79b );
-        legMaterial.specular = SPECULAR_COLOR;
-
-        var footMaterial = new THREE.MeshPhongMaterial( { color: 0x960f0b } );
-        footMaterial.specular = SPECULAR_COLOR;
+        headMaterial.specular = 
+        hatMaterial.specular  = 
+        footMaterial.specular = 
+        bodyMaterial.specular = 
+        legMaterial.specular  = new THREE.Color("rgb(0.5,0.5,0.5)");
 
         var sphere, cylinder, cube;
-
         var bevelRadius = 1.9;  // TODO: 2.0 causes some geometry bug.
 
         // MODELS
