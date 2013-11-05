@@ -63,13 +63,14 @@
       var cylinder, petal, i;
       for ( i = 0; i < NUM_PETALS; i++ ) {
         cylinder = new THREE.Mesh( cylGeom, petalMaterial );
+        cylinder.scale.x = 0.25;
+        cylinder.position.y = petalLength/2;
+
         petal = new THREE.Object3D();
         petal.add( cylinder );
-
-        cylinder.position.y = flowerHeight;
-        cylinder.rotation.z = 90 * Math.PI/180;
-        cylinder.position.x = -petalLength/2;
         petal.rotation.y = (i * 360/NUM_PETALS) * Math.PI/180;
+        petal.rotation.z = 70 * Math.PI/180;
+        petal.position.y = flowerHeight;
 
         flower.add( petal );
       }
